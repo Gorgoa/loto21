@@ -1,5 +1,5 @@
 """
-🎰 Gorgoa Analyzer Pro
+🎰 EuroMillones Analyzer Pro
 =============================
 Aplicación de análisis estadístico, Machine Learning y Algoritmos Genéticos
 para el estudio matemático del sorteo EuroMillones.
@@ -9,7 +9,7 @@ Los sorteos de lotería son eventos aleatorios i.i.d. (independientes e
 idénticamente distribuidos). NO se garantiza ninguna predicción real.
 No se fomenta el juego ni se ofrece consejo de apuestas.
 
-Autor: Gorgoa AI | Fecha: Febrero 2026
+Autor: Claude AI | Fecha: Febrero 2026
 """
 
 import streamlit as st
@@ -38,7 +38,7 @@ warnings.filterwarnings("ignore")
 # CONFIGURACIÓN GLOBAL
 # ─────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="🎰 Gorgoa Analyzer Pro",
+    page_title="🎰 EuroMillones Analyzer Pro",
     page_icon="🎰",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -1009,7 +1009,7 @@ def main():
     # Header
     st.markdown("""
     <div class="main-header">
-        <h1>🎰 Gorgoa Analyzer Pro</h1>
+        <h1>🎰 EuroMillones Analyzer Pro</h1>
         <p>Análisis estadístico • Machine Learning • Algoritmos Genéticos • Simulaciones</p>
     </div>
     """, unsafe_allow_html=True)
@@ -1738,7 +1738,7 @@ def main():
     st.markdown("---")
     st.markdown("""
     <div style="text-align: center; color: #666; font-size: 0.8rem;">
-        🎰 Gorgoa Analyzer Pro v1.0 | Experimento matemático y educativo<br>
+        🎰 EuroMillones Analyzer Pro v1.0 | Experimento matemático y educativo<br>
         ⚠️ Los sorteos son aleatorios. Esta app NO garantiza predicciones ni fomenta el juego.
     </div>
     """, unsafe_allow_html=True)
