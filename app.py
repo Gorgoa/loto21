@@ -145,6 +145,9 @@ def normalize_dataframe(df):
     """Normaliza columnas del DataFrame al formato estándar."""
     df = df.copy()
 
+    # Eliminar filas completamente vacías
+    df = df.dropna(how="all")
+
     # Intentar detectar columnas de fecha
     date_cols = [c for c in df.columns if any(k in str(c).lower() for k in ["fecha", "date", "día", "dia"])]
     num_cols = [c for c in df.columns if any(k in str(c).lower() for k in ["num", "bola", "ball", "número"])]
@@ -153,8 +156,10 @@ def normalize_dataframe(df):
     # Si las columnas ya tienen el formato esperado
     expected_num = ["Num1", "Num2", "Num3", "Num4", "Num5"]
     expected_star = ["Estrella1", "Estrella2"]
+    all_expected = expected_num + expected_star
 
-    if all(c in df.columns for c in expected_num + expected_star):
+    if all(c in df.columns for c in all_expected):
+        # Columnas correctas - solo normalizar fecha
         if date_cols:
             df["Fecha"] = pd.to_datetime(df[date_cols[0]], errors="coerce", dayfirst=True)
         elif "Fecha" not in df.columns:
@@ -163,25 +168,40 @@ def normalize_dataframe(df):
         # Intentar mapear columnas numéricas
         numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
         if len(numeric_cols) >= 7:
-            # Asumimos primeras 5 numéricas = números, siguientes 2 = estrellas
             for i, col in enumerate(expected_num):
                 if i < len(numeric_cols):
-                    df[col] = df[numeric_cols[i]].astype(int)
+                    df[col] = pd.to_numeric(df[numeric_cols[i]], errors="coerce")
             for i, col in enumerate(expected_star):
                 if 5 + i < len(numeric_cols):
-                    df[col] = df[numeric_cols[5 + i]].astype(int)
+                    df[col] = pd.to_numeric(df[numeric_cols[5 + i]], errors="coerce")
         if date_cols:
             df["Fecha"] = pd.to_datetime(df[date_cols[0]], errors="coerce", dayfirst=True)
         elif "Fecha" not in df.columns:
             df["Fecha"] = pd.date_range(end=pd.Timestamp.now(), periods=len(df), freq="3D")
 
-    # Validación: números 1-50, estrellas 1-12
+    # Forzar conversión numérica y eliminar filas con NaN en columnas clave
+    for col in expected_num + expected_star:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    key_cols = [c for c in expected_num + expected_star if c in df.columns]
+    if key_cols:
+        df = df.dropna(subset=key_cols)
+
+    # Validación: números 1-50, estrellas 1-12 (fillna como doble seguro)
     for col in ["Num1", "Num2", "Num3", "Num4", "Num5"]:
         if col in df.columns:
-            df[col] = df[col].clip(1, 50).astype(int)
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).clip(1, 50).astype(int)
     for col in ["Estrella1", "Estrella2"]:
         if col in df.columns:
-            df[col] = df[col].clip(1, 12).astype(int)
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).clip(1, 12).astype(int)
+
+    # Eliminar filas con fecha NaT o valores inválidos residuales
+    if "Fecha" in df.columns:
+        df = df.dropna(subset=["Fecha"])
+    # Eliminar cualquier fila donde un número sea 0 (valor centinela de fillna)
+    for col in key_cols:
+        df = df[df[col] > 0]
 
     df = df.sort_values("Fecha").reset_index(drop=True)
     return df
